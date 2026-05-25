@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MIKULINK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#020203;--white:rgba(255,255,255,.96);--text:rgba(255,255,255,.78);
+      --mint:#39c5bb;--mint2:#86cecb;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      min-height:100%;overflow-x:hidden;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(57,197,187,.11),transparent 30%),
+        radial-gradient(circle at 10% 20%,rgba(134,206,203,.08),transparent 22%),
+        linear-gradient(180deg,#080b0f 0%,#020203 52%,#010102 100%);
+      color:var(--text);font-family:'EB Garamond','Noto Serif JP',serif
+    }
+    body{position:relative;overflow-y:auto;min-height:100vh}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;
+      background-image:linear-gradient(120deg,transparent 0 49.6%,rgba(255,255,255,.02) 49.7% 50.3%,transparent 50.4% 100%);z-index:0}
+    .noise{position:fixed;inset:0;z-index:1;pointer-events:none;
+      background-image:radial-gradient(rgba(255,255,255,.06) .55px,transparent .55px);
+      background-size:18px 18px;opacity:.11;mix-blend-mode:screen}
+
+    /* ── Intro ── */
+    .intro-screen{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:#000;transition:opacity .7s ease,visibility .7s ease}
+    .intro-screen.hide{opacity:0;visibility:hidden}
+    .intro-text{color:#fff;font-family:'Noto Serif JP',serif;font-size:clamp(22px,4vw,44px);letter-spacing:.12em;text-align:center;padding:0 20px;line-height:1.6}
+    .cursor{display:inline-block;animation:blink .3s step-end 4}
+    @keyframes blink{50%{opacity:0}}
+
+    /* ── Layout ── */
+    .wrap{position:relative;z-index:2;min-height:100vh;padding:32px 18px 44px;display:flex;align-items:center;justify-content:center}
+    .main{width:min(100%,1120px);display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+    .main.ready{opacity:1;transform:translateY(0)}
+
+    /* ── Logo ── */
+    .logo{
+      font-family:'EB Garamond',serif;
+      font-size:clamp(56px,10vw,108px);
+      font-weight:600;letter-spacing:.24em;padding-left:.24em;
+      color:#fff;
+      text-shadow:0 0 18px rgba(57,197,187,.18),0 0 42px rgba(57,197,187,.09);
+      line-height:1.15;
+    }
+    .logo-i{position:relative;display:inline-block}
+    .logo-i-char{display:inline-block;transition:opacity .35s ease}
+    .logo-i-heart{
+      position:absolute;left:50%;top:50%;
+      transform:translate(-50%,-52%);
+      font-size:.6em;
+      color:var(--mint);
+      text-shadow:0 0 8px rgba(57,197,187,1),0 0 22px rgba(57,197,187,.9),0 0 44px rgba(57,197,187,.6),0 0 80px rgba(57,197,187,.3);
+      opacity:0;transition:opacity .35s ease;
+      pointer-events:none;white-space:nowrap;letter-spacing:0;
+    }
+    .logo-i.is-heart .logo-i-char{opacity:0}
+    .logo-i.is-heart .logo-i-heart{opacity:1}
+
+    .tagline{font-family:'Noto Serif JP',serif;font-size:clamp(18px,2vw,26px);line-height:1.9;color:var(--white);letter-spacing:.08em;max-width:760px}
+    .sub{font-family:'Noto Serif JP',serif;font-size:clamp(14px,1.7vw,17px);line-height:2.1;letter-spacing:.06em;color:rgba(255,255,255,.74);max-width:760px}
+
+    /* ── Cards ── */
+    .links{width:min(100%,980px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:10px}
+
+    .link-card{
+      display:flex;flex-direction:column;justify-content:space-between;
+      padding:22px;min-height:160px;
+      text-decoration:none;position:relative;overflow:hidden;
+      text-align:left;
+      clip-path:polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%);
+      border-left:3px solid var(--mint);
+      border-top:1px solid rgba(57,197,187,.2);
+      border-right:1px solid rgba(57,197,187,.12);
+      border-bottom:1px solid rgba(57,197,187,.12);
+      background:linear-gradient(145deg,#0c1f1e 0%,#040d0c 100%);
+      box-shadow:
+        0 0 12px rgba(57,197,187,.18),
+        0 0 28px rgba(57,197,187,.07),
+        inset 4px 0 14px rgba(57,197,187,.05),
+        inset 0 0 24px rgba(57,197,187,.03);
+      transition:transform .22s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    .link-card::before{
+      content:'';position:absolute;left:0;right:0;top:0;
+      height:2px;
+      background:linear-gradient(90deg,transparent,rgba(57,197,187,.72),transparent);
+      animation:card-scan 4.5s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes card-scan{
+      0%  {top:0;  opacity:0}
+      4%  {opacity:1}
+      92% {opacity:.75}
+      100%{top:100%;opacity:0}
+    }
+    .link-card::after{
+      content:'';position:absolute;top:0;right:0;
+      width:26px;height:26px;
+      background:var(--mint);
+      clip-path:polygon(100% 0,100% 100%,0 0);
+      opacity:.82;transition:opacity .22s ease;
+      pointer-events:none;
+    }
+    .link-card:hover{
+      transform:translateY(-4px);
+      border-left-color:rgba(57,197,187,.95);
+      border-color:rgba(57,197,187,.4);
+      box-shadow:
+        -6px 0 28px rgba(57,197,187,.3),
+        0 0 40px rgba(57,197,187,.14),
+        0 0 70px rgba(57,197,187,.07),
+        inset 0 0 30px rgba(57,197,187,.07);
+    }
+    .link-card:hover::after{opacity:1}
+
+    .link-comment{
+      font-family:'Noto Serif JP',serif;
+      font-size:clamp(15px,1.7vw,19px);
+      line-height:1.9;
+      color:rgba(210,255,252,.9);
+      word-break:normal;
+      overflow-wrap:break-word;
+      flex:1;
+    }
+    .link-footer{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-top:14px;
+      font-family:'Noto Serif JP',serif;
+      font-size:11px;letter-spacing:.16em;
+      color:rgba(57,197,187,.52);
+    }
+
+    /* ── Share ── */
+    .share{width:min(100%,760px);display:flex;flex-direction:column;gap:12px;align-items:center;margin-top:6px}
+    .share-label{font-family:'EB Garamond',serif;font-size:12px;letter-spacing:.28em;color:rgba(255,255,255,.42)}
+    .share-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+    .share-btn{
+      appearance:none;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);
+      color:var(--white);font-family:'Noto Serif JP',serif;font-size:12px;letter-spacing:.12em;
+      text-decoration:none;padding:12px 16px;border-radius:999px;
+      transition:all .22s ease;cursor:pointer;
+    }
+    .share-btn:hover{background:rgba(57,197,187,.96);color:#000;border-color:rgba(57,197,187,.96)}
+
+    .footer-note{width:min(100%,760px);font-family:'Noto Serif JP',serif;font-size:11px;line-height:1.9;letter-spacing:.1em;color:rgba(255,255,255,.32);text-align:center;padding-top:6px}
+
+    /* ── Floating comments ── */
+    .comments-layer{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+    .comment{position:absolute;white-space:nowrap;color:rgba(190,255,245,.72);font-family:'Noto Serif JP',serif;font-weight:300;letter-spacing:.04em;text-shadow:0 0 12px rgba(57,197,187,.22);animation:drift linear infinite;user-select:none;will-change:transform}
+    @keyframes drift{from{transform:translateX(120vw)}to{transform:translateX(-140vw)}}
+
+    /* ── Glows ── */
+    .glow{position:fixed;width:340px;height:340px;border-radius:999px;filter:blur(42px);pointer-events:none;z-index:1;opacity:.55}
+    .glow.one{top:8%;left:-70px;background:radial-gradient(circle,rgba(57,197,187,.18),transparent 70%);animation:pulse 10s ease-in-out infinite}
+    .glow.two{right:-60px;bottom:10%;background:radial-gradient(circle,rgba(134,206,203,.12),transparent 70%);animation:pulse 12s ease-in-out infinite reverse}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:.42}50%{transform:scale(1.14);opacity:.82}}
+
+    @media(max-width:900px){.links{grid-template-columns:1fr}.link-card{min-height:auto}}
+    @media(max-width:640px){
+      .wrap{padding:22px 14px 28px}
+      .logo{font-size:clamp(44px,16vw,76px)}
+      .tagline{font-size:18px}
+      .sub{line-height:2}
+      .link-comment{font-size:15px}
+      .link-card{padding:18px}
+      .share-btn{flex:1 1 100%;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="intro-screen" id="intro-screen" aria-hidden="true">
+    <div class="intro-text" id="intro-text"></div>
+  </div>
+  <div class="noise"></div>
+  <div class="glow one"></div>
+  <div class="glow two"></div>
+  <div class="comments-layer" id="comments-layer"></div>
+
+  <main class="wrap">
+    <section class="main" id="main">
+      <div class="logo">M<span class="miku-i logo-i"><span class="logo-i-char">I</span><span class="logo-i-heart">♥</span></span>KUL<span class="link-i logo-i"><span class="logo-i-char">I</span><span class="logo-i-heart">♥</span></span>NK</div>
+      <div class="tagline">見つけて欲しいミクがいる。</div>
+      <div class="sub">MIKULINKは、曲を聴いた誰かのコメントからミクに出会えるサービスです。</div>
+      <div class="links" id="links" aria-label="YouTubeリンク一覧"></div>
+      <div class="share">
+        <div class="share-label">SHARE THIS NIGHT</div>
+        <div class="share-row">
+          <a class="share-btn" id="share-x" href="#" target="_blank" rel="noopener noreferrer">𝕏でシェア</a>
+          <a class="share-btn" id="share-line" href="#" target="_blank" rel="noopener noreferrer">LINEでシェア</a>
+          <button class="share-btn" id="copy-share">URLをコピー</button>
+        </div>
+      </div>
+      <div class="footer-note">同じ曲は20回以内に繰り返されません。 また来て、新しいミクと出会ってください。</div>
+    </section>
+  </main>
+
+  <script>
+  const introMessage='見つけて欲しいミクがいる';
+  const introTarget=document.getElementById('intro-text');
+  const introScreen=document.getElementById('intro-screen');
+  const mainEl=document.getElementById('main');
+  function startIntro(){
+    let i=0;
+    function type(){
+      if(i<=introMessage.length){introTarget.innerHTML=introMessage.slice(0,i)+'<span class="cursor">_</span>';i++;setTimeout(type,110);return}
+      let b=0;const t=setInterval(()=>{b++;introTarget.innerHTML=introMessage+'<span class="cursor">_</span>';if(b>=4){clearInterval(t);setTimeout(()=>{introScreen.classList.add('hide');mainEl.classList.add('ready')},180)}},300);
+    }
+    type();
+  }
+
+  const mikuI=document.querySelector('.miku-i');
+  const linkI=document.querySelector('.link-i');
+  let heartPhase=-1;
+  function tickHeart(){
+    heartPhase=(heartPhase+1)%4;
+    mikuI.classList.toggle('is-heart',heartPhase===0);
+    linkI.classList.toggle('is-heart',heartPhase===2);
+  }
+  tickHeart();
+  setInterval(tickHeart,2000);
+
+  const POOL=[
+    {id:'001',title:'千本桜',            artist:'黒うさP',           url:'https://www.youtube.com/results?search_query=千本桜+初音ミク+黒うさP',                 comment:'日本語ロックの頂点がここにある'},
+    {id:'002',title:'ワールドイズマイン', artist:'ryo(supercell)',     url:'https://www.youtube.com/results?search_query=ワールドイズマイン+初音ミク+ryo+supercell', comment:'これを超えるラブソングにまだ出会えてない'},
+    {id:'003',title:'メルト',            artist:'ryo(supercell)',     url:'https://www.youtube.com/results?search_query=メルト+初音ミク+ryo+supercell',            comment:'初めて聴いた日のことを鮮明に覚えてる'},
+    {id:'004',title:'初音ミクの消失',    artist:'cosMo@暴走P',       url:'https://www.youtube.com/results?search_query=初音ミクの消失+cosMo',                     comment:'これは音楽じゃなくて現象だと思う'},
+    {id:'005',title:'恋愛裁判',          artist:'40mP',              url:'https://www.youtube.com/results?search_query=恋愛裁判+初音ミク+40mP',                   comment:'ミクが一番かわいい瞬間がここにある'},
+    {id:'006',title:'ロミオとシンデレラ', artist:'doriko',            url:'https://www.youtube.com/results?search_query=ロミオとシンデレラ+初音ミク+doriko',        comment:'高校のあの頃を毎回思い出す'},
+    {id:'007',title:'炉心融解',          artist:'ika(reqm)',          url:'https://www.youtube.com/results?search_query=炉心融解+初音ミク+ika',                     comment:'このミクだけは誰にも渡せない'},
+    {id:'008',title:'裏表ラバーズ',      artist:'よわむしP',         url:'https://www.youtube.com/results?search_query=裏表ラバーズ+初音ミク+よわむしP',           comment:'テンポと熱量がおかしい。好きすぎる'},
+    {id:'009',title:'砂の惑星',          artist:'ハチ',              url:'https://www.youtube.com/results?search_query=砂の惑星+初音ミク+ハチ',                    comment:'ボカロへの愛と問いが一曲に詰まってる'},
+    {id:'010',title:'マトリョシカ',      artist:'ハチ',              url:'https://www.youtube.com/results?search_query=マトリョシカ+初音ミク+ハチ',                comment:'頭がおかしくなりそうなのに離れられない'},
+    {id:'011',title:'心做し',            artist:'Neru',              url:'https://www.youtube.com/results?search_query=心做し+初音ミク+Neru',                      comment:'夜中に聴くと何かが静かに壊れる'},
+    {id:'012',title:'アンハッピーリフレイン', artist:'wowaka',        url:'https://www.youtube.com/results?search_query=アンハッピーリフレイン+初音ミク+wowaka',    comment:'wowaka先生の曲の中で一番好き'},
+    {id:'013',title:'ローリンガール',    artist:'wowaka',            url:'https://www.youtube.com/results?search_query=ローリンガール+初音ミク+wowaka',            comment:'今でもイントロで涙腺が緩む'},
+    {id:'014',title:'六兆年と一夜物語',  artist:'kemu',              url:'https://www.youtube.com/results?search_query=六兆年と一夜物語+初音ミク+kemu',            comment:'中2の夜に初めて聴いてから時が止まった'},
+    {id:'015',title:'劣等上等',          artist:'kemu',              url:'https://www.youtube.com/results?search_query=劣等上等+初音ミク+kemu',                    comment:'やさぐれてた頃に何度救われたかわからない'},
+    {id:'016',title:'命に嫌われている',  artist:'カンザキイオリ',     url:'https://www.youtube.com/results?search_query=命に嫌われている+初音ミク+カンザキイオリ',  comment:'ミクが歌うことで別の意味が生まれる曲'},
+    {id:'017',title:'モザイクロール',    artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=モザイクロール+初音ミク+DECO27',            comment:'タイトルのセンスから天才だとわかる'},
+    {id:'018',title:'ゴーストルール',    artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=ゴーストルール+初音ミク+DECO27',            comment:'ラスサビで毎回呼吸を忘れる'},
+    {id:'019',title:'乙女解剖',          artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=乙女解剖+初音ミク+DECO27',                 comment:'かわいいのに怖い。ミクにしかできない表現'},
+    {id:'020',title:'妄想感傷代償連盟',  artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=妄想感傷代償連盟+初音ミク+DECO27',         comment:'タイトルを読むたびに新しい意味が見える'},
+    {id:'021',title:'ヒバナ',            artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=ヒバナ+初音ミク+DECO27',                   comment:'怒りと愛情が同時に来る曲'},
+    {id:'022',title:'エゴロック',        artist:'ピノキオP',         url:'https://www.youtube.com/results?search_query=エゴロック+初音ミク+ピノキオP',             comment:'ピノキオPの集大成はこれだと思う'},
+    {id:'023',title:'チュルリラ・チュルリラ・ダッダッダ！',artist:'ピノキオP',url:'https://www.youtube.com/results?search_query=チュルリラ+ピノキオP+初音ミク',   comment:'謎なのに中毒性が天井を突き抜けてる'},
+    {id:'024',title:'エイリアンエイリアン',artist:'ナユタン星人',     url:'https://www.youtube.com/results?search_query=エイリアンエイリアン+初音ミク+ナユタン星人',comment:'宇宙から届いた曲としか思えない'},
+    {id:'025',title:'ダーリンダンス',    artist:'かいりきベア',       url:'https://www.youtube.com/results?search_query=ダーリンダンス+初音ミク+かいりきベア',      comment:'MVも合わさって完璧な世界観になってる'},
+    {id:'026',title:'ベノム',            artist:'かいりきベア',       url:'https://www.youtube.com/results?search_query=ベノム+初音ミク+かいりきベア',              comment:'歌詞の毒が心地よくて何回でも聴ける'},
+    {id:'027',title:'天ノ弱',            artist:'164',               url:'https://www.youtube.com/results?search_query=天ノ弱+初音ミク+164',                      comment:'再生数が少ないの本当に信じられない'},
+    {id:'028',title:'グリーンライツ・セレナーデ',artist:'Omoi',      url:'https://www.youtube.com/results?search_query=グリーンライツセレナーデ+初音ミク+Omoi',    comment:'壮大すぎてミクの声でしか耐えられない'},
+    {id:'029',title:'東京テディベア',    artist:'Neru',              url:'https://www.youtube.com/results?search_query=東京テディベア+初音ミク+Neru',              comment:'この孤独を言語化してくれてありがとう'},
+    {id:'030',title:'十面相',            artist:'Neru',              url:'https://www.youtube.com/results?search_query=十面相+初音ミク+Neru',                     comment:'社会への怒りがここまで美しくなれる'},
+    {id:'031',title:'深海少女',          artist:'れるりり',           url:'https://www.youtube.com/results?search_query=深海少女+初音ミク+れるりり',               comment:'泳げない私が深海にいる気分になる'},
+    {id:'032',title:'メランコリック',    artist:'junky',             url:'https://www.youtube.com/results?search_query=メランコリック+初音ミク+junky',             comment:'疾走感とせつなさが同時に来るの反則'},
+    {id:'033',title:'脳漿炸裂ガール',    artist:'r-906',             url:'https://www.youtube.com/results?search_query=脳漿炸裂ガール+初音ミク',                   comment:'速さと語感の暴力に毎回やられる'},
+    {id:'034',title:'ワンダーランドと羊の歌',artist:'R Sound Design', url:'https://www.youtube.com/results?search_query=ワンダーランドと羊の歌+初音ミク',          comment:'眠れない夜専用の曲だと思ってる'},
+    {id:'035',title:'ストリーミングハート',artist:'DECO*27',         url:'https://www.youtube.com/results?search_query=ストリーミングハート+初音ミク+DECO27',     comment:'インターネット育ちにしか刺さらない温度'},
+    {id:'036',title:'悪ノ娘',            artist:'mothy',             url:'https://www.youtube.com/results?search_query=悪ノ娘+初音ミク+mothy',                    comment:'物語シリーズの入口になった曲'},
+    {id:'037',title:'心拍数♯0822',      artist:'蝶々P',             url:'https://www.youtube.com/results?search_query=心拍数0822+初音ミク+蝶々P',                comment:'タイトルの意味を知ったとき鳥肌が立った'},
+    {id:'038',title:'ダブルラリアット',  artist:'アゴアニキ',         url:'https://www.youtube.com/results?search_query=ダブルラリアット+初音ミク+アゴアニキ',      comment:'ぐるぐるしてる映像と曲が完全に一致してる'},
+    {id:'039',title:'桜の季節',          artist:'halyosy',           url:'https://www.youtube.com/results?search_query=桜の季節+初音ミク+halyosy',                comment:'卒業式のたびにこれを思い出す'},
+    {id:'040',title:'タイムマシン',      artist:'和田たけあき',       url:'https://www.youtube.com/results?search_query=タイムマシン+初音ミク+和田たけあき',        comment:'戻れない過去への未練がここにある'},
+    {id:'041',title:'ロキ',              artist:'Crusher-P',         url:'https://www.youtube.com/results?search_query=ロキ+初音ミク+CrusherP',                   comment:'洋楽っぽいのにミクの声が完璧にはまってる'},
+    {id:'042',title:'ECHO',              artist:'Crusher-P',         url:'https://www.youtube.com/results?search_query=ECHO+初音ミク+Crusher-P',                  comment:'英語詞とミクの組み合わせの到達点のひとつ'},
+    {id:'043',title:'弱虫モンブラン',    artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=弱虫モンブラン+初音ミク+DECO27',           comment:'失恋した翌日に聴いて泣き崩れた'},
+    {id:'044',title:'ノスタルジア',      artist:'とP',               url:'https://www.youtube.com/results?search_query=ノスタルジア+初音ミク+とP',                comment:'タイトル通りの感情が確かに来る'},
+    {id:'045',title:'初音ミクの激唱',    artist:'cosMo@暴走P',       url:'https://www.youtube.com/results?search_query=初音ミクの激唱+cosMo',                     comment:'これはもう音楽競技の域だと思う'},
+    {id:'046',title:'ブレス・ユア・ブレス',artist:'和田たけあき',     url:'https://www.youtube.com/results?search_query=ブレスユアブレス+初音ミク',                 comment:'呼吸するように好きになっていく曲'},
+    {id:'047',title:'テレキャスタービーボーイ',artist:'長谷川白紙',   url:'https://www.youtube.com/results?search_query=テレキャスタービーボーイ+初音ミク+長谷川白紙',comment:'音楽の概念が更新された体験だった'},
+    {id:'048',title:'1/6',               artist:'1640mP',            url:'https://www.youtube.com/results?search_query=1%2F6+初音ミク+1640mP',                   comment:'地球の重力の話をこんなにせつなく歌える'},
+    {id:'049',title:'ムーンライトでつかまえて',artist:'40mP',         url:'https://www.youtube.com/results?search_query=ムーンライトでつかまえて+初音ミク+40mP',   comment:'40mPの曲の中で一番夜に合うのはこれ'},
+    {id:'050',title:'ヒトガタ',          artist:'DECO*27',           url:'https://www.youtube.com/results?search_query=ヒトガタ+初音ミク+DECO27',                 comment:'形のないものへの問いかけがずっと刺さってる'},
+    {id:'051',title:'さよならのかわりに', artist:'ピノキオP',        url:'https://www.youtube.com/results?search_query=さよならのかわりに+初音ミク+ピノキオP',     comment:'別れる前夜に聴いたら立ち直れなくなった'},
+    {id:'052',title:'ピアノ×フォルテ×スキャンダル',artist:'OSTER project',url:'https://www.youtube.com/results?search_query=ピアノフォルテスキャンダル+初音ミク+OSTER',comment:'古いのに今聴いても全然色褪せてない'},
+    {id:'053',title:'FREELY TOMORROW',   artist:'Mitchie M',         url:'https://www.youtube.com/results?search_query=FREELY+TOMORROW+初音ミク+MitchieM',      comment:'ミクが人間に聞こえる瞬間がある'},
+    {id:'054',title:'Hand in Hand',      artist:'Mitchie M',         url:'https://www.youtube.com/results?search_query=Hand+in+Hand+初音ミク+MitchieM',          comment:'幸せすぎてなぜか泣ける曲'},
+    {id:'055',title:'初音天地開闢神話',  artist:'とP',               url:'https://www.youtube.com/results?search_query=初音天地開闢神話+初音ミク',                comment:'ミクの歴史と宇宙が同じスケールで語られてる'},
+  ];
+
+  const SEEN_KEY='mikulink_seen_v3';const MAX_SEEN=20;
+  function getSeenIds(){try{return JSON.parse(localStorage.getItem(SEEN_KEY)||'[]')}catch{return[]}}
+  function saveSeenIds(ids){try{localStorage.setItem(SEEN_KEY,JSON.stringify(ids))}catch{}}
+  function pickThree(){
+    const seen=getSeenIds();
+    const available=POOL.filter(item=>!seen.includes(item.id));
+    const source=available.length>=3?available:POOL;
+    const arr=[...source];
+    for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+    const picks=arr.slice(0,3);
+    const updated=[...seen,...picks.map(p=>p.id)];
+    saveSeenIds(updated.length>MAX_SEEN?updated.slice(updated.length-MAX_SEEN):updated);
+    return picks;
+  }
+
+  const selected=pickThree();
+  document.getElementById('links').innerHTML=selected.map(item=>`
+    <a class="link-card" href="${item.url}" target="_blank" rel="noopener noreferrer">
+      <div class="link-comment">${item.comment}</div>
+      <div class="link-footer">
+        <span>${item.title} / ${item.artist}</span>
+        <span>▶ 開く</span>
+      </div>
+    </a>
+  `).join('');
+
+  const shareText=encodeURIComponent('見つけて欲しいミクがいる。\nMIKULINKは、曲を聴いた誰かのコメントからミクに出会えるサービスです。');
+  const shareUrl=encodeURIComponent(window.location.href);
+  document.getElementById('share-x').href=`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
+  document.getElementById('share-line').href=`https://social-plugins.line.me/lineit/share?url=${shareUrl}`;
+  document.getElementById('copy-share').addEventListener('click',async(e)=>{
+    e.preventDefault();
+    try{await navigator.clipboard.writeText(window.location.href);e.currentTarget.textContent='コピーしました';setTimeout(()=>e.currentTarget.textContent='URLをコピー',1600)}
+    catch{alert('URLのコピーに失敗しました')}
+  });
+
+  const floatingComments=['今でも深夜に聴いてる','受験期の夜を思い出す','誰にも言えなかった頃の曲','2026年でもここにいる','ラスサビで毎回崩れる','もっと伸びて欲しい','高校の帰り道だった','再生数が少ないの信じられない','深夜3時に刺さる','コメント欄込みで作品','あの冬を思い出す','まだ見つかってない名曲','ミクリンクから来ました！','この曲だけは消えないで欲しい','夜にしか合わない気がする','今聴いても泣ける','ひとりの部屋にちょうどいい','ずっとここにいてくれ','聴くたびに景色が変わる','誰かの人生が詰まってる','ミクにしか歌えない曲がある','この世界観は替えが効かない','初めて聴いた日に戻りたい'];
+  const layer=document.getElementById('comments-layer');
+  function rnd(a,b){return a+Math.random()*(b-a)}
+  for(let i=0;i<44;i++){
+    const el=document.createElement('div');el.className='comment';
+    el.textContent=floatingComments[Math.floor(Math.random()*floatingComments.length)];
+    el.style.top=`${Math.random()*100}%`;el.style.fontSize=`${rnd(12,20)}px`;
+    el.style.opacity=rnd(0.18,0.55);el.style.animationDuration=`${rnd(22,42)}s`;el.style.animationDelay=`${rnd(-38,0)}s`;
+    layer.appendChild(el);
+  }
+
+  startIntro();
+  </script>
+</body>
+</html>
